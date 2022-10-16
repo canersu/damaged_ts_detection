@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from curses import raw
 from chardet import detect
 import rospy
 import cv2
@@ -36,14 +37,15 @@ class TSDetections():
                 results = self.model(frame_yolo, self.model_size)
                 #color = (0,0,255)
                 #thickness = 2
-                framess = []
+                images = []
                 detects = detections()
-                frame_i = frame_info()
+                image_info = frame_info()
                 h = Header()
                 h.stamp = rospy.Time.now()
+                h.frame_id = 'bbox'
                 # print('#Detected Signs: ', len(results.xyxy[0]), ' frame: ', cnt)
                 for i in range(len(results.xyxy[0])):
-                    frame_i = frame_info()
+                    image_info = frame_info()
                     xmin = int(results.xyxy[0][i][0])
                     ymin = int(results.xyxy[0][i][1])
                     xmax = int(results.xyxy[0][i][2])
@@ -54,15 +56,15 @@ class TSDetections():
 
                     conf = float(results.xyxy[0][i][4])
                     class_id = int(results.xyxy[0][i][5])
-                    print('#Detected Sign: ', class_id, ' frame: ', cnt)
-                    frame_i.x1 = xmin
-                    frame_i.x2 = ymin
-                    frame_i.y1 = xmax
-                    frame_i.y2 = ymax
-                    frame_i.class_id = class_id
-                    frame_i.confidence = conf
+                    # print('#Detected Sign: ', class_id, ' frame: ', cnt)
+                    image_info.x1 = xmin
+                    image_info.x2 = ymin
+                    image_info.y1 = xmax
+                    image_info.y2 = ymax
+                    image_info.class_id = class_id
+                    image_info.confidence = conf
 
-                    framess.append(frame_i)
+                    images.append(image_info)
 
 
                     #frame = cv2.rectangle(frame, start_point, end_point, color, thickness)
@@ -70,12 +72,12 @@ class TSDetections():
                     #cv2.putText(frame, 'id' + class_id, (xmin,ymax), font, 0.8, (0,255,255), 2, cv2.LINE_AA)
                 
                 #cv2.imshow('Scene',frame)
-                if len(framess) <= 1:
-                    framess = [frame_i]
-
-                detects.frames = framess
+                detects.frames = images
                 detects.header = h
                 self.detect_pub.publish(detects)
+
+                raw_img = self.bridge.cv2_to_imgmsg(frame, "bgr8")
+                self.raw_image_pub.publish(raw_img)
 
                 # if cv2.waitKey(25) & 0xFF == ord('q'):
                 #    break
@@ -88,7 +90,7 @@ class TSDetections():
         end_time = time.time()
         elapsed_time = end_time - start_time
         print('Elapsed Time: ', elapsed_time)
-        cv2.destroyAllWindows()
+        # cv2.destroyAllWindows()
 
         #final = self.bridge.cv2_to_imgmsg(self.final_img, "bgr8")
 
