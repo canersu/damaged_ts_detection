@@ -1,2 +1,2 @@
 Header header
-frame_info[] detections
+frame_info[] frames
