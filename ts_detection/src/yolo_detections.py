@@ -18,6 +18,7 @@ class TSDetections():
         rospy.init_node('DetectionNode', anonymous=True)
         self.model = torch.hub.load('/home/can/thesis/yolov5', 'custom', path='/home/can/thesis/results/yolov5/yolov5l/weights/best.pt', source='local')
         self.model.conf = 0.75
+        self.model.iou = 0.95
         self.infile = "/home/can/thesis/notebooks/sample_video_01_cut.mp4"
         self.model_size = 640
 
