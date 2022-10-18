@@ -58,8 +58,8 @@ class TSDetections():
                     class_id = int(results.xyxy[0][i][5])
                     # print('#Detected Sign: ', class_id, ' frame: ', cnt)
                     image_info.x1 = xmin
-                    image_info.x2 = ymin
-                    image_info.y1 = xmax
+                    image_info.y1 = ymin
+                    image_info.x2 = xmax
                     image_info.y2 = ymax
                     image_info.class_id = class_id
                     image_info.confidence = conf
