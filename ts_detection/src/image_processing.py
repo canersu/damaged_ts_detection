@@ -12,6 +12,7 @@ import time
 from ts_detection.msg import frame_info, detections
 from std_msgs.msg import Header
 import ae
+import tensorflow as tf
 
 
 class ImProc():
@@ -26,6 +27,8 @@ class ImProc():
         rospy.Subscriber('/thesis/raw_image', Image, self.img_callback)
 
         self.crop_pub = rospy.Publisher('/thesis/cropped_ts',Image, queue_size=1)
+        # self.weight_file17 = "/home/can/thesis/ae_weights/17fullmodel1mse.h5"
+        # self.ae17 = ae.autoEncoder()
 
     def det_callback(self, data):
         self.frame_list = data.frames
@@ -47,6 +50,7 @@ class ImProc():
                 print("TS ID: ", ts_id, " Confidence: ", conf)
 
                 self.crop_pub.publish(self.bridge.cv2_to_imgmsg(crop, "bgr8"))
+                # model17 = self.ae17.loadModel(self.weight_file17)
 
 
 

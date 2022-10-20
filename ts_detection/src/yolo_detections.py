@@ -10,6 +10,7 @@ import torch
 import time
 from ts_detection.msg import frame_info, detections
 from std_msgs.msg import Header
+#import ae
 
 class TSDetections():
     # ===================================== INIT==========================================
@@ -20,13 +21,22 @@ class TSDetections():
         self.model.conf = 0.75
         self.model.iou = 0.95
         self.infile = "/home/can/thesis/notebooks/sample_video_01_cut.mp4"
+        self.det_img_out_dir = "/home/can/thesis/ros_detections/"
         self.model_size = 640
 
         self.raw_image_pub = rospy.Publisher('/thesis/raw_image', Image, queue_size=1)
         self.detect_pub = rospy.Publisher('/thesis/ts_detection', detections, queue_size=1)
+        self.crop_pub = rospy.Publisher('/thesis/cropped_ts',Image, queue_size=1)
+        #self.weight_file17 = "/home/can/thesis/ae_weights/17fullmodel1mse.h5"
+        #self.ae17 = ae.autoEncoder()
 
     def yolo_detections(self):
         cnt = 0
+        det_cnt = 0
+        xmin = 0
+        xmax = 0
+        ymin = 0
+        ymax = 0
         cap = cv2.VideoCapture(self.infile)
         start_time = time.time()
         while(cap.isOpened()):
@@ -78,7 +88,13 @@ class TSDetections():
                 self.detect_pub.publish(detects)
 
                 raw_img = self.bridge.cv2_to_imgmsg(frame, "bgr8")
+                # model17 = self.ae17.loadModel(self.weight_file17)
                 self.raw_image_pub.publish(raw_img)
+                if len(images) > 0:
+                    crop = frame[ymin:ymax, xmin:xmax]
+                    self.crop_pub.publish(self.bridge.cv2_to_imgmsg(crop, "bgr8"))
+                    print("TS ID: ", class_id, " Confidence: ", conf)
+                    # cv2.imwrite(self.det_img_out_dir+str(class_id)+'/'+str(conf)+'.png',crop)
 
                 # if cv2.waitKey(25) & 0xFF == ord('q'):
                 #    break
@@ -98,6 +114,7 @@ class TSDetections():
 if __name__ == '__main__':
     try:
         img_detect = TSDetections()
+        time.sleep(2)
         img_detect.yolo_detections()
     except rospy.ROSInterruptException:
         pass
