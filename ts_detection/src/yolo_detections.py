@@ -94,7 +94,7 @@ class TSDetections():
                     crop = frame[ymin:ymax, xmin:xmax]
                     self.crop_pub.publish(self.bridge.cv2_to_imgmsg(crop, "bgr8"))
                     print("TS ID: ", class_id, " Confidence: ", conf)
-                    # cv2.imwrite(self.det_img_out_dir+str(class_id)+'/'+str(conf)+'.png',crop)
+                    cv2.imwrite(self.det_img_out_dir+str(class_id)+'/'+str(conf)+'.png',crop)
 
                 # if cv2.waitKey(25) & 0xFF == ord('q'):
                 #    break
