@@ -101,6 +101,7 @@ class TSDetections():
                     print("TS ID: ", class_id, " Confidence: ", conf)
                     cv2.imwrite(self.det_img_out_dir+str(class_id)+'/'+str(det_cnt)+'.png',crop)
                     crop_rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
+                    crop_rgb = crop_rgb/255.0
                     resized_crop = cv2.resize(crop_rgb, (48,48), interpolation = cv2.INTER_AREA)
                     resized_crop = resized_crop[None]
 
