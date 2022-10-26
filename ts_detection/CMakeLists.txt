@@ -52,6 +52,7 @@ add_message_files(
   FILES
   frame_info.msg
   detections.msg
+  detection_info.msg
 )
 
 ## Generate services in the 'srv' folder

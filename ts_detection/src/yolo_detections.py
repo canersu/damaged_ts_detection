@@ -8,7 +8,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import torch
 import time
-from ts_detection.msg import frame_info, detections
+from ts_detection.msg import frame_info, detections, detection_info
 from std_msgs.msg import Header
 import ae
 import tensorflow as tf
@@ -28,6 +28,8 @@ class TSDetections():
         self.raw_image_pub = rospy.Publisher('/thesis/raw_image', Image, queue_size=1)
         self.detect_pub = rospy.Publisher('/thesis/ts_detection', detections, queue_size=1)
         self.crop_pub = rospy.Publisher('/thesis/cropped_ts',Image, queue_size=1)
+        self.det_pub = rospy.Publisher('/thesis/ae_det',detection_info, queue_size=1)
+
         self.ae_weight = "/home/can/thesis/ae_weights/cropped_allfullmodel1mse.h5"
         self.ae_ = ae.autoEncoder()
         self.ae_model = self.ae_.loadModel(self.ae_weight)
@@ -53,6 +55,7 @@ class TSDetections():
                 images = []
                 detects = detections()
                 image_info = frame_info()
+                det_info = detection_info()
                 h = Header()
                 h.stamp = rospy.Time.now()
                 h.frame_id = 'bbox'
@@ -96,17 +99,21 @@ class TSDetections():
                     crop = frame[ymin:ymax, xmin:xmax]
                     self.crop_pub.publish(self.bridge.cv2_to_imgmsg(crop, "bgr8"))
                     print("TS ID: ", class_id, " Confidence: ", conf)
-                    # cv2.imwrite(self.det_img_out_dir+str(class_id)+'/'+str(conf)+'.png',crop)
+                    cv2.imwrite(self.det_img_out_dir+str(class_id)+'/'+str(det_cnt)+'.png',crop)
                     crop_rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
                     resized_crop = cv2.resize(crop_rgb, (48,48), interpolation = cv2.INTER_AREA)
-                    print(resized_crop.shape)
                     resized_crop = resized_crop[None]
-                    print(resized_crop.shape)
 
                     gen = self.ae_model.predict(resized_crop)
                     img_tensor = tf.convert_to_tensor(resized_crop, dtype=tf.float32)
                     val = self.ae_.compMetric(img_tensor, gen, "SSIM")
-                    print(val)
+                    det_info.confidence = conf
+                    det_info.class_id = class_id
+                    det_info.ssim_comp = val
+                    det_info.id = det_cnt
+                    self.det_pub.publish(det_info)
+                    det_cnt += 1
+                    
 
                 # if cv2.waitKey(25) & 0xFF == ord('q'):
                 #    break
