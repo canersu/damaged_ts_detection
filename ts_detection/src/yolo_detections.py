@@ -59,16 +59,12 @@ class TSDetections():
                 h = Header()
                 h.stamp = rospy.Time.now()
                 h.frame_id = 'bbox'
-                # print('#Detected Signs: ', len(results.xyxy[0]), ' frame: ', cnt)
                 for i in range(len(results.xyxy[0])):
                     image_info = frame_info()
                     xmin = int(results.xyxy[0][i][0])
                     ymin = int(results.xyxy[0][i][1])
                     xmax = int(results.xyxy[0][i][2])
                     ymax = int(results.xyxy[0][i][3])
-
-                    #start_point = (xmin, ymin)
-                    #end_point = (xmax, ymax)
 
                     conf = float(results.xyxy[0][i][4])
                     class_id = int(results.xyxy[0][i][5])
@@ -82,18 +78,11 @@ class TSDetections():
 
                     images.append(image_info)
 
-
-                    #frame = cv2.rectangle(frame, start_point, end_point, color, thickness)
-                    #font = cv2.FONT_HERSHEY_SIMPLEX
-                    #cv2.putText(frame, 'id' + class_id, (xmin,ymax), font, 0.8, (0,255,255), 2, cv2.LINE_AA)
-                
-                #cv2.imshow('Scene',frame)
                 detects.frames = images
                 detects.header = h
                 self.detect_pub.publish(detects)
 
                 raw_img = self.bridge.cv2_to_imgmsg(frame, "bgr8")
-                # model17 = self.ae17.loadModel(self.weight_file17)
                 self.raw_image_pub.publish(raw_img)
                 if len(images) > 0:
                     crop = frame[ymin:ymax, xmin:xmax]
@@ -114,11 +103,6 @@ class TSDetections():
                     det_info.id = det_cnt
                     self.det_pub.publish(det_info)
                     det_cnt += 1
-                    
-
-                # if cv2.waitKey(25) & 0xFF == ord('q'):
-                #    break
-
             else:
                 break
 
@@ -127,9 +111,6 @@ class TSDetections():
         end_time = time.time()
         elapsed_time = end_time - start_time
         print('Elapsed Time: ', elapsed_time)
-        # cv2.destroyAllWindows()
-
-        #final = self.bridge.cv2_to_imgmsg(self.final_img, "bgr8")
 
 if __name__ == '__main__':
     try:
