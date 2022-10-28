@@ -18,12 +18,14 @@ class TSDetections():
     def __init__(self):
         self.bridge = CvBridge()
         rospy.init_node('DetectionNode', anonymous=True)
-        self.model = torch.hub.load('/home/can/thesis/yolov5', 'custom', path='/home/can/thesis/results/yolov5/yolov5l/weights/best.pt', source='local')
-        self.model.conf = 0.75
-        self.model.iou = 0.95
-        self.infile = "/home/can/thesis/notebooks/sample_video_01_cut.mp4"
+        yolo_model = rospy.get_param('/yolo_weight_file')
+        yolo_path = rospy.get_param('/yolo_dir')
+        self.model = torch.hub.load(yolo_path, 'custom', path=yolo_model, source='local')
+        self.input_file = rospy.get_param('/input_source')
+        self.model_size = rospy.get_param('yolo_input_size')
+        self.model.conf = rospy.get_param('yolo_confidence')
+        self.model.iou = rospy.get_param('yolo_iou')
         self.det_img_out_dir = "/home/can/thesis/ros_detections/"
-        self.model_size = 640
 
         self.raw_image_pub = rospy.Publisher('/thesis/raw_image', Image, queue_size=1)
         self.detect_pub = rospy.Publisher('/thesis/ts_detection', detections, queue_size=1)
@@ -41,7 +43,7 @@ class TSDetections():
         xmax = 0
         ymin = 0
         ymax = 0
-        cap = cv2.VideoCapture(self.infile)
+        cap = cv2.VideoCapture(self.input_file)
         start_time = time.time()
         while(cap.isOpened()):
             ret, frame = cap.read()

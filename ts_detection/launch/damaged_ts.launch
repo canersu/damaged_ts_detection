@@ -1,3 +1,9 @@
 <launch>
   <node name="DetectionNode" pkg="ts_detection" type="yolo_detections.py" output="screen"/>
+  <param name='/yolo_weight_file' type='string' value='/home/can/thesis/results/yolov5/yolov5l/weights/best.pt'/>
+  <param name='/yolo_dir' type='string' value='/home/can/thesis/yolov5'/>
+  <param name='/input_source' type='string' value='/home/can/thesis/notebooks/sample_video_01_cut.mp4'/>
+  <param name='/yolo_input_size' type='int' value='640'/>
+  <param name='/yolo_confidence' type='float' value='0.75'/>
+  <param name='/yolo_iou' type='int' value='0.95'/>
 </launch>
