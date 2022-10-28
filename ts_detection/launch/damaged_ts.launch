@@ -1,9 +1,13 @@
 <launch>
   <node name="DetectionNode" pkg="ts_detection" type="yolo_detections.py" output="screen"/>
-  <param name='/yolo_weight_file' type='string' value='/home/can/thesis/results/yolov5/yolov5l/weights/best.pt'/>
-  <param name='/yolo_dir' type='string' value='/home/can/thesis/yolov5'/>
-  <param name='/input_source' type='string' value='/home/can/thesis/notebooks/sample_video_01_cut.mp4'/>
+  <param name='/yolo_weight_file' type='str' value='/home/can/thesis/results/yolov5/yolov5l/weights/best.pt'/>
+  <param name='/yolo_dir' type='str' value='/home/can/thesis/yolov5'/>
+  <param name='/input_source' type='str' value='/home/can/thesis/notebooks/sample_video_01_cut.mp4'/>
   <param name='/yolo_input_size' type='int' value='640'/>
-  <param name='/yolo_confidence' type='float' value='0.75'/>
-  <param name='/yolo_iou' type='int' value='0.95'/>
+  <param name='/yolo_confidence' type='double' value='0.75'/>
+  <param name='/yolo_iou' type='double' value='0.95'/>
+  <param name='/save_output' type='bool' value='False'/>
+  <param name= '/detected_imgs_save_dir' type = 'str' value = '/home/can/thesis/ros_detections/'/>
+  <param name='/debug' type='bool' value='False'/>
+  <param name= '/autoencoder_model' type = 'str' value = '/home/can/thesis/ae_weights/cropped_allfullmodel1mse.h5'/>
 </launch>

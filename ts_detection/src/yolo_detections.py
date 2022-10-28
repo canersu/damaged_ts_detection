@@ -25,14 +25,17 @@ class TSDetections():
         self.model_size = rospy.get_param('yolo_input_size')
         self.model.conf = rospy.get_param('yolo_confidence')
         self.model.iou = rospy.get_param('yolo_iou')
-        self.det_img_out_dir = "/home/can/thesis/ros_detections/"
+        self.save_output = rospy.get_param('/save_output')
+        self.debug = rospy.get_param('/debug')
+
+        self.det_img_out_dir = rospy.get_param('/detected_imgs_save_dir')
 
         self.raw_image_pub = rospy.Publisher('/thesis/raw_image', Image, queue_size=1)
         self.detect_pub = rospy.Publisher('/thesis/ts_detection', detections, queue_size=1)
         self.crop_pub = rospy.Publisher('/thesis/cropped_ts',Image, queue_size=1)
         self.det_pub = rospy.Publisher('/thesis/ae_det',detection_info, queue_size=1)
 
-        self.ae_weight = "/home/can/thesis/ae_weights/cropped_allfullmodel1mse.h5"
+        self.ae_weight = rospy.get_param('/autoencoder_model')
         self.ae_ = ae.autoEncoder()
         self.ae_model = self.ae_.loadModel(self.ae_weight)
 
@@ -84,13 +87,16 @@ class TSDetections():
                 detects.header = h
                 self.detect_pub.publish(detects)
 
-                raw_img = self.bridge.cv2_to_imgmsg(frame, "bgr8")
-                self.raw_image_pub.publish(raw_img)
+                if self.debug:
+                    raw_img = self.bridge.cv2_to_imgmsg(frame, "bgr8")
+                    self.raw_image_pub.publish(raw_img)
                 if len(images) > 0:
                     crop = frame[ymin:ymax, xmin:xmax]
-                    self.crop_pub.publish(self.bridge.cv2_to_imgmsg(crop, "bgr8"))
+                    if self.debug:
+                        self.crop_pub.publish(self.bridge.cv2_to_imgmsg(crop, "bgr8"))
                     print("TS ID: ", class_id, " Confidence: ", conf)
-                    cv2.imwrite(self.det_img_out_dir+str(class_id)+'/'+str(det_cnt)+'.png',crop)
+                    if self.save_output:
+                        cv2.imwrite(self.det_img_out_dir+str(class_id)+'/'+str(det_cnt)+'.png',crop)
                     crop_rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
                     crop_rgb = crop_rgb/255.0
                     resized_crop = cv2.resize(crop_rgb, (48,48), interpolation = cv2.INTER_AREA)
