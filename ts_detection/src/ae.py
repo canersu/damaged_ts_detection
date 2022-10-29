@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from PIL import Image
 from sklearn.model_selection import train_test_split
+from torch import nn
 # from keras.utils import to_categorical
 
 import os
@@ -55,7 +56,24 @@ class autoEncoder:
         if printSummary:
             ae.summary()
         return ae
-    
+    def torch_model1(self, printSummary=False):
+        self.encoder = nn.Sequential(
+            nn.Linear(48 * 48 * 3, 46*46*8),
+            nn.ReLU(),
+            nn.Linear(46*46*8, 44*44*16),
+            nn.ReLU(),
+            nn.MaxPool2d(2, stride=2),
+            nn.Linear(22*22*16, 20*20*32),
+            nn.ReLU(),
+            nn.Linear(20*20*32, 18*18*64),
+            nn.ReLU(),
+            nn.MaxPool2d(2, stride=2),
+            nn.Flatten(9*9*64),
+
+
+            nn.Linear(18, 9)
+        )
+
     def model2(self, printSummary=False):
         ae = tf.keras.models.Sequential()
         ae.add(tf.keras.layers.Conv2D(filters=8, kernel_size=(3,3), activation='relu', input_shape=self.img_shape))
