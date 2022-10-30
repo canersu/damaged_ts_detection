@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from PIL import Image
 from sklearn.model_selection import train_test_split
-from torch import nn
+from torch import nn, reshape
 # from keras.utils import to_categorical
 
 import os
@@ -68,7 +68,20 @@ class autoEncoder:
             nn.Linear(20*20*32, 18*18*64),
             nn.ReLU(),
             nn.MaxPool2d(2, stride=2),
-            nn.Flatten(9*9*64),
+            nn.Linear(5184, 1024),
+            nn.Linear(1024, 256),
+            nn.Linear(256, 1024),
+            nn.Linear(1024, 5184),
+            reshape()
+            nn.Upsample(size=(2,2)),
+            nn.ConvTranspose2d(5184, 18*18*64),
+            nn.ReLU(),
+
+            nn.ReLU(),
+            nn.ReLU(),
+            nn.ReLU(),
+
+
 
 
             nn.Linear(18, 9)
