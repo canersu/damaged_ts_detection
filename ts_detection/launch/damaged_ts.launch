@@ -4,7 +4,7 @@
   <param name='/yolo_dir' type='str' value='/home/can/thesis/yolov5'/>
   <param name='/input_source' type='str' value='/home/can/thesis/notebooks/sample_video_01_cut.mp4'/>
   <param name='/yolo_input_size' type='int' value='640'/>
-  <param name='/yolo_confidence' type='double' value='0.75'/>
+  <param name='/yolo_confidence' type='double' value='0.8'/>
   <param name='/yolo_iou' type='double' value='0.9'/>
   <param name='/save_output' type='bool' value='False'/>
   <param name= '/detected_imgs_save_dir' type = 'str' value = '/home/can/thesis/ros_detections/'/>
