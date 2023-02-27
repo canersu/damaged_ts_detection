@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-from curses import raw
-from chardet import detect
 import rospy
 import cv2
 import numpy as np
@@ -12,6 +10,7 @@ from ts_detection.msg import frame_info, detections, detection_info
 from std_msgs.msg import Header
 import ae
 import tensorflow as tf
+import yaml
 
 class TSDetections():
     # ===================================== INIT==========================================
@@ -27,6 +26,7 @@ class TSDetections():
         self.model.iou = rospy.get_param('yolo_iou')
         self.save_output = rospy.get_param('/save_output')
         self.debug = rospy.get_param('/debug')
+        self.save_video = rospy.get_param('/output_video')
 
         self.det_img_out_dir = rospy.get_param('/detected_imgs_save_dir')
 
@@ -39,6 +39,10 @@ class TSDetections():
         self.ae_ = ae.autoEncoder()
         self.ae_model = self.ae_.loadModel(self.ae_weight)
 
+        # Load the YAML file into a Python dictionary
+        with open("/home/can/damaged_ts_detection/src/ts_detection/iqa.yaml") as file:
+            self.iqa_data = yaml.safe_load(file)
+
     def yolo_detections(self):
         cnt = 0
         det_cnt = 0
@@ -48,6 +52,16 @@ class TSDetections():
         ymax = 0
         cap = cv2.VideoCapture(self.input_file)
         start_time = time.time()
+        frame_width = int(cap.get(3))
+        frame_height = int(cap.get(4))
+        vid_fps =(int(cap.get(cv2.CAP_PROP_FPS)))
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        fontScale = 0.4
+        textcolor = (255, 0, 255)
+        textthickness = 1
+
+
+        out_vid = cv2.VideoWriter("/home/can/damaged_ts_detection/denek_output.avi", cv2.VideoWriter_fourcc('M','J','P','G'), vid_fps, (frame_width,frame_height))
         while(cap.isOpened()):
             ret, frame = cap.read()
             if ret == True:
@@ -55,8 +69,8 @@ class TSDetections():
                 cnt += 1
 
                 results = self.model(frame_yolo, self.model_size)
-                #color = (0,0,255)
-                #thickness = 2
+                color = (0,0,255)
+                thickness = 2
                 images = []
                 detects = detections()
                 image_info = frame_info()
@@ -83,9 +97,21 @@ class TSDetections():
 
                     images.append(image_info)
 
+                    if (self.save_video==True) or (self.debug==True):
+                        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, thickness)
+                        cv2.putText(frame, str(class_id) + ": " + self.iqa_data[class_id]["name"], (xmin, ymin-30), font, fontScale, textcolor, textthickness, cv2.LINE_AA)
+                        cv2.putText(frame, "yolo conf: " + str(conf), (xmin, ymin-20), font, fontScale, textcolor, textthickness, cv2.LINE_AA)
+                        #cv2.putText(frame, "SSIM Dist: " + str(conf), (xmin, ymin-20), font, fontScale, textcolor, textthickness, cv2.LINE_AA)
+
                 detects.frames = images
                 detects.header = h
                 self.detect_pub.publish(detects)
+
+                if self.save_video:
+                    out_vid.write(frame)
+                    cv2.imshow("output", frame)
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
 
                 if self.debug:
                     raw_img = self.bridge.cv2_to_imgmsg(frame, "bgr8")
@@ -116,6 +142,7 @@ class TSDetections():
 
         print('Total Frames: ' + str(cnt))
         cap.release()
+        out_vid.release()
         end_time = time.time()
         elapsed_time = end_time - start_time
         print('Elapsed Time: ', elapsed_time)
