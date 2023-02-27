@@ -42,6 +42,47 @@ class TSDetections():
         # Load the YAML file into a Python dictionary
         with open("/home/can/damaged_ts_detection/src/ts_detection/iqa.yaml") as file:
             self.iqa_data = yaml.safe_load(file)
+    
+    def detect_objects(self, img, iou_thresh, conf_thresh, yolo_input_size):
+        class_ids = []
+        conf_vals = []
+        bboxes_coords = []
+        cropped_imgs = []
+
+        img = img[:, :, ::-1]
+        results = self.model(img, yolo_input_size)
+        num_detections = len(results.xyxy[0])
+
+        for i in range(num_detections):
+            xmin = int(results.xyxy[0][i][0])
+            ymin = int(results.xyxy[0][i][1])
+            xmax = int(results.xyxy[0][i][2])
+            ymax = int(results.xyxy[0][i][3])
+            conf = float(results.xyxy[0][i][4])
+            class_id = int(results.xyxy[0][i][5])
+
+            bbox_coords = [xmin, ymin, xmax, ymax]
+            crop = img[ymin:ymax, xmin:xmax]
+
+            bboxes_coords.append(bbox_coords)
+            class_ids.append(class_id)
+            conf_vals.append(conf)
+            cropped_imgs.append(crop)
+        
+        return class_ids, conf_vals, bboxes_coords, num_detections, cropped_imgs
+    
+    def distance_val(self, crop_img, comp_metric):
+                 
+        crop_rgb = cv2.cvtColor(crop_img, cv2.COLOR_BGR2RGB)
+        crop_rgb = crop_rgb/255.0
+        resized_crop = cv2.resize(crop_rgb, (48,48), interpolation = cv2.INTER_AREA)
+        resized_crop = resized_crop[None]
+        gen = self.ae_model.predict(resized_crop)
+        img_tensor = tf.convert_to_tensor(resized_crop, dtype=tf.float32)
+        val = self.ae_.compMetric(img_tensor, gen, comp_metric)
+        return val
+
+
 
     def yolo_detections(self):
         cnt = 0
@@ -56,7 +97,7 @@ class TSDetections():
         frame_height = int(cap.get(4))
         vid_fps =(int(cap.get(cv2.CAP_PROP_FPS)))
         font = cv2.FONT_HERSHEY_SIMPLEX
-        fontScale = 0.4
+        fontScale = 0.75
         textcolor = (255, 0, 255)
         textthickness = 1
 
@@ -99,9 +140,24 @@ class TSDetections():
 
                     if (self.save_video==True) or (self.debug==True):
                         cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, thickness)
-                        cv2.putText(frame, str(class_id) + ": " + self.iqa_data[class_id]["name"], (xmin, ymin-30), font, fontScale, textcolor, textthickness, cv2.LINE_AA)
-                        cv2.putText(frame, "yolo conf: " + str(conf), (xmin, ymin-20), font, fontScale, textcolor, textthickness, cv2.LINE_AA)
-                        #cv2.putText(frame, "SSIM Dist: " + str(conf), (xmin, ymin-20), font, fontScale, textcolor, textthickness, cv2.LINE_AA)
+                        cv2.putText(frame, str(class_id) + ": " + self.iqa_data[class_id]["name"], (xmin, ymin-60), font, fontScale, textcolor, textthickness, cv2.LINE_AA)
+                        cv2.putText(frame, "yolo conf: " + str(conf), (xmin, ymin-45), font, fontScale, textcolor, textthickness, cv2.LINE_AA)
+
+                        crop = frame[ymin:ymax, xmin:xmax]
+                        print("TS ID: ", class_id, " Confidence: ", conf)
+                        crop_rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
+                        crop_rgb = crop_rgb/255.0
+                        resized_crop = cv2.resize(crop_rgb, (48,48), interpolation = cv2.INTER_AREA)
+                        resized_crop = resized_crop[None]
+                        gen = self.ae_model.predict(resized_crop)
+                        img_tensor = tf.convert_to_tensor(resized_crop, dtype=tf.float32)
+                        val = self.ae_.compMetric(img_tensor, gen, "SSIM")
+                        cv2.putText(frame, "SSIM Dist: " + str(val), (xmin, ymin-30), font, fontScale, textcolor, textthickness, cv2.LINE_AA)
+                        threshold = self.iqa_data[class_id]["ssim"]["mean"] + 2.0*self.iqa_data[class_id]["ssim"]["sigma"]
+                        if val >= threshold:
+                            cv2.putText(frame, "Damaged !!", (xmin, ymin-15), font, fontScale, textcolor, textthickness, cv2.LINE_AA)
+                        else:
+                            cv2.putText(frame, "Not Damaged", (xmin, ymin-15), font, fontScale, textcolor, textthickness, cv2.LINE_AA)
 
                 detects.frames = images
                 detects.header = h
@@ -116,27 +172,27 @@ class TSDetections():
                 if self.debug:
                     raw_img = self.bridge.cv2_to_imgmsg(frame, "bgr8")
                     self.raw_image_pub.publish(raw_img)
-                if len(images) > 0:
-                    crop = frame[ymin:ymax, xmin:xmax]
-                    if self.debug:
-                        self.crop_pub.publish(self.bridge.cv2_to_imgmsg(crop, "bgr8"))
-                    print("TS ID: ", class_id, " Confidence: ", conf)
-                    if self.save_output:
-                        cv2.imwrite(self.det_img_out_dir+str(class_id)+'/'+str(det_cnt)+'.png',crop)
-                    crop_rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
-                    crop_rgb = crop_rgb/255.0
-                    resized_crop = cv2.resize(crop_rgb, (48,48), interpolation = cv2.INTER_AREA)
-                    resized_crop = resized_crop[None]
+                # if len(images) > 0:
+                #     crop = frame[ymin:ymax, xmin:xmax]
+                #     if self.debug:
+                #         self.crop_pub.publish(self.bridge.cv2_to_imgmsg(crop, "bgr8"))
+                #     print("TS ID: ", class_id, " Confidence: ", conf)
+                #     if self.save_output:
+                #         cv2.imwrite(self.det_img_out_dir+str(class_id)+'/'+str(det_cnt)+'.png',crop)
+                #     crop_rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
+                #     crop_rgb = crop_rgb/255.0
+                #     resized_crop = cv2.resize(crop_rgb, (48,48), interpolation = cv2.INTER_AREA)
+                #     resized_crop = resized_crop[None]
 
-                    gen = self.ae_model.predict(resized_crop)
-                    img_tensor = tf.convert_to_tensor(resized_crop, dtype=tf.float32)
-                    val = self.ae_.compMetric(img_tensor, gen, "SSIM")
-                    det_info.confidence = conf
-                    det_info.class_id = class_id
-                    det_info.ssim_comp = val
-                    det_info.id = det_cnt
-                    self.det_pub.publish(det_info)
-                    det_cnt += 1
+                #     gen = self.ae_model.predict(resized_crop)
+                #     img_tensor = tf.convert_to_tensor(resized_crop, dtype=tf.float32)
+                #     val = self.ae_.compMetric(img_tensor, gen, "SSIM")
+                #     det_info.confidence = conf
+                #     det_info.class_id = class_id
+                #     det_info.ssim_comp = val
+                #     det_info.id = det_cnt
+                #     self.det_pub.publish(det_info)
+                #     det_cnt += 1
             else:
                 break
 
