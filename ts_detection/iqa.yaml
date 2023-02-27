@@ -1,4 +1,5 @@
 0:
+  name: "Speed Limit 20"
   ssim:
     mean: 0.0992803027232488
     sigma: 0.0414485591425681
@@ -12,6 +13,7 @@
     mean: 0.14463933
     sigma: 0.033464584
 1:
+  name: "Speed Limit 30"
   ssim:
     mean: 0.12982828546729352
     sigma: 0.06736744442790431
@@ -25,6 +27,7 @@
     mean: 0.15917699
     sigma: 0.04433477
 2:
+  name: "Speed Limit 50"
   ssim:
     mean: 0.09998105645179749
     sigma: 0.05174025592087274
@@ -38,6 +41,7 @@
     mean: 0.14096002
     sigma: 0.040969416
 3:
+  name: "Speed Limit 60"
   ssim:
     mean: 0.10290014836523267
     sigma: 0.053949498109684794
@@ -51,6 +55,7 @@
     mean: 0.13861778
     sigma: 0.050148234
 4:
+  name: "Speed Limit 70"
   ssim:
     mean: 0.10599192119005954
     sigma: 0.0694469624756295
@@ -64,6 +69,7 @@
     mean: 0.14505795
     sigma: 0.056048747
 5:
+  name: "Speed Limit 80"
   ssim:
     mean: 0.11360356438727606
     sigma: 0.058050281778628185
@@ -77,6 +83,7 @@
     mean: 0.1538899
     sigma: 0.06406813
 6:
+  name: "End of Speed Limit 80"
   ssim:
     mean: 0.09015025099118551
     sigma: 0.042779537501453614
@@ -90,6 +97,7 @@
     mean: 0.121022895
     sigma: 0.022800447
 7:
+  name: "Speed Limit 100"
   ssim:
     mean: 0.12989688873291017
     sigma: 0.05282276062008114
@@ -103,6 +111,7 @@
     mean: 0.16728933
     sigma: 0.037588026
 8:
+  name: "Speed Limit 120"
   ssim:
     mean: 0.11515650444560581
     sigma: 0.04759994243871807
@@ -116,6 +125,7 @@
     mean: 0.13464145
     sigma: 0.035242997
 9:
+  name: "No Overtaking"
   ssim:
     mean: 0.1290170104553302
     sigma: 0.08415544618053844
@@ -129,6 +139,7 @@
     mean: 0.17380266
     sigma: 0.110433474
 10:
+  name: "No Overtaking For Trucks"
   ssim:
     mean: 0.08424105102365667
     sigma: 0.03599175186059388
@@ -142,6 +153,7 @@
     mean: 0.12178161
     sigma: 0.027375385
 11:
+  name: "Crossroads Ahead"
   ssim:
     mean: 0.20080102135737737
     sigma: 0.07203331861404522
@@ -155,6 +167,7 @@
     mean: 0.21819974
     sigma: 0.08010417
 12:
+  name: "Priority Road"
   ssim:
     mean: 0.2307143118934355
     sigma: 0.1252137968715744
@@ -168,6 +181,7 @@
     mean: 0.19410852
     sigma: 0.09837299
 13:
+  name: "Yield"
   ssim:
     mean: 0.19637529883119795
     sigma: 0.07930121682641951
@@ -181,6 +195,7 @@
     mean: 0.20055576
     sigma: 0.085807085
 14:
+  name: "Stop"
   ssim:
     mean: 0.18625294919367189
     sigma: 0.0910854541252423
@@ -194,6 +209,7 @@
     mean: 0.19607614
     sigma: 0.06617361
 15:
+  name: "Road Closed"
   ssim:
     mean: 0.15411588067100163
     sigma: 0.06385857890722473
@@ -207,6 +223,7 @@
     mean: 0.17167364
     sigma: 0.05512206
 16:
+  name: "Forbidden Entrance Truck"
   ssim:
     mean: 0.08891390562057495
     sigma: 0.027923393721700576
@@ -220,6 +237,7 @@
     mean: 0.1431561
     sigma: 0.035636816
 17:
+  name: "No Entry"
   ssim:
     mean: 0.1930742899576823
     sigma: 0.08031160727487126
@@ -233,6 +251,7 @@
     mean: 0.185212
     sigma: 0.10299747
 18:
+  name: "Warning"
   ssim:
     mean: 0.186056614227784
     sigma: 0.09605836305477064
@@ -246,6 +265,7 @@
     mean: 0.183417
     sigma: 0.07378
 19:
+  name: "Left Curve Ahead"
   ssim:
     mean: 0.09182718694210053
     sigma: 0.026731595610281978
@@ -259,6 +279,7 @@
     mean: 0.17772163
     sigma: 0.04813285
 20:
+  name: "Right Curve Ahead"
   ssim:
     mean: 0.18927584290504457
     sigma: 0.05930478299980763
@@ -272,6 +293,7 @@
     mean: 0.20668823
     sigma: 0.063081004
 21:
+  name: "Double Curve Ahead"
   ssim:
     mean: 0.3115200251340866
     sigma: 0.1292605707469619
@@ -285,6 +307,7 @@
     mean: 0.2931538
     sigma: 0.074865036
 22:
+  name: "Rough Road Ahead"
   ssim:
     mean: 0.2148637336989244
     sigma: 0.14242254222350498
@@ -298,6 +321,7 @@
     mean: 0.23027538
     sigma: 0.11606462
 23:
+  name: "Danger of Slipping"
   ssim:
     mean: 0.1993646494547526
     sigma: 0.08648753073800497
@@ -311,6 +335,7 @@
     mean: 0.23171799
     sigma: 0.07397057
 24:
+  name: "Road Narrows Right Side"
   ssim:
     mean: 0.3145375476943122
     sigma: 0.11698188172264672
@@ -324,6 +349,7 @@
     mean: 0.31885922
     sigma: 0.12937887
 25:
+  name: "Road Construction"
   ssim:
     mean: 0.24010431226342915
     sigma: 0.10185669114271627
@@ -337,6 +363,7 @@
     mean: 0.25611678
     sigma: 0.082333885
 26:
+  name: "Traffic Light Ahead"
   ssim:
     mean: 0.1931282099750307
     sigma: 0.09004977434528137
@@ -350,6 +377,7 @@
     mean: 0.18847635
     sigma: 0.05616888
 27:
+  name: "Pedestrian Crossing"
   ssim:
     mean: 0.3303344652056694
     sigma: 0.16663658190867855
@@ -363,6 +391,7 @@
     mean: 0.69046855
     sigma: 0.52817947
 28:
+  name: "Warning Children"
   ssim:
     mean: 0.2319933299223582
     sigma: 0.09488966018211664
@@ -376,6 +405,7 @@
     mean: 0.23279892
     sigma: 0.08917207
 29:
+  name: "Warning Bicycles"
   ssim:
     mean: 0.28078946669896443
     sigma: 0.06879834149130326
@@ -389,6 +419,7 @@
     mean: 0.26516533
     sigma: 0.0698235
 30:
+  name: "Warning Icy Road"
   ssim:
     mean: 0.16282184104124706
     sigma: 0.07778106324957455
@@ -402,6 +433,7 @@
     mean: 0.16047709
     sigma: 0.053860903
 31:
+  name: "Warning Wild Animals"
   ssim:
     mean: 0.0921067304081387
     sigma: 0.03703833495092243
@@ -415,6 +447,7 @@
     mean: 0.14018765
     sigma: 0.033284936
 32:
+  name: "End of Restriction Area"
   ssim:
     mean: 0.13288250068823496
     sigma: 0.08121411881731319
@@ -428,6 +461,7 @@
     mean: 0.14475875
     sigma: 0.060404766
 33:
+  name: "Turn Right"
   ssim:
     mean: 0.2174105526435943
     sigma: 0.0815789581777165
@@ -441,6 +475,7 @@
     mean: 0.18057221
     sigma: 0.059285726
 34:
+  name: "Turn Left"
   ssim:
     mean: 0.2006753663221995
     sigma: 0.06138695491023497
@@ -454,6 +489,7 @@
     mean: 0.14860563
     sigma: 0.02696433
 35:
+  name: "Straight Ahead"
   ssim:
     mean: 0.1433883460668417
     sigma: 0.0705002106964458
@@ -467,6 +503,7 @@
     mean: 0.15467861
     sigma: 0.049947493
 36:
+  name: "Straight Ahead or Right"
   ssim:
     mean: 0.23155600825945535
     sigma: 0.09393012164208708
@@ -480,6 +517,7 @@
     mean: 0.17611773
     sigma: 0.063719444
 37:
+  name: "Straight Ahead or Left"
   ssim:
     mean: 0.16211858292420706
     sigma: 0.061060849002585224
@@ -493,6 +531,7 @@
     mean: 0.2117826
     sigma: 0.07264272
 38:
+  name: "Drive Right of Obstacle"
   ssim:
     mean: 0.18777483347533405
     sigma: 0.09465022995127281
@@ -506,6 +545,7 @@
     mean: 0.17010076
     sigma: 0.06786804
 39:
+  name: "Drive Left of Obstacle"
   ssim:
     mean: 0.19913648234473336
     sigma: 0.08726340582145156
@@ -519,6 +559,7 @@
     mean: 0.17083828
     sigma: 0.042408604
 40:
+  name: "Roundabout"
   ssim:
     mean: 0.2168966982099745
     sigma: 0.0494571827856541
@@ -532,6 +573,7 @@
     mean: 0.20463346
     sigma: 0.04154318
 41:
+  name: "End of Overtaking"
   ssim:
     mean: 0.18275059759616852
     sigma: 0.03514651570471377
@@ -545,6 +587,7 @@
     mean: 0.18826431
     sigma: 0.0382478
 42:
+  name: "End of Overtaking Trucks"
   ssim:
     mean: 0.1584470782015059
     sigma: 0.1064174040189921
