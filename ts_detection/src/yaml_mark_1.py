@@ -7,3 +7,4 @@ with open("../iqa.yaml") as file:
 # Access the values in the dictionary
 print(data[10]["mre"]["sigma"]) # Output: John Doe
 #print(data["person2"]["address"]["zip"]) # Output: 94103
+print(data[10]["name"]) # Output: John Doe
