@@ -9,7 +9,10 @@
   <param name='/save_output' type='bool' value='False'/>
   <param name= '/detected_imgs_save_dir' type = 'str' value = '/home/can/desktop_thesis/ros_detections/'/>
   <param name='/debug' type='bool' value='False'/>
-  <param name='/output_video' type='bool' value='True'/>
+  <param name='/save_video' type='bool' value='True'/>
   <param name='/video_output_path' type='str' value='/home/can/desktop_thesis/out_vid.mp4'/>
   <param name= '/autoencoder_model' type = 'str' value = '/home/can/desktop_thesis/ae_weights/cropped_allfullmodel1mse.h5'/>
+  <param name= '/iqa_file' type = 'str' value = '/home/can/damaged_ts_detection/src/ts_detection/iqa.yaml'/>
+  <param name= '/comp_metric' type = 'str' value = 'SSIM'/>
+  <param name='/sigma_multiplier' type='double' value='2.0'/>
 </launch>
