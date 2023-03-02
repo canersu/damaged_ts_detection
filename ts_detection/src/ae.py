@@ -106,15 +106,15 @@ class autoEncoder:
         return model
     
     def compMetric(self, img1, img2, method):
-        if method == "SSIM":
+        if method == "SSIM" or method == "ssim":
             return 1 - float(tf.image.ssim(img1, img2, 1.0))
-        elif method == "PSNR":
+        elif method == "PSNR" or method == "psnr":
             return float(tf.image.psnr(img1, img2, max_val=255))
-        elif method == "MSE":
+        elif method == "MSE" or method == "mse":
             m = tf.keras.metrics.MeanSquaredError()
-        elif method == "RMSE":
+        elif method == "RMSE" or method == "rmse":
             m = tf.keras.metrics.RootMeanSquaredError()
-        elif method == "MRE":
+        elif method == "MRE" or method == "mre":
             m = tf.keras.metrics.MeanRelativeError(normalizer=img1)
         else:
             print("Invalid Metric !!")
