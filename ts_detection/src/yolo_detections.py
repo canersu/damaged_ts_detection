@@ -26,7 +26,7 @@ class TSDetections():
         self.model.iou = rospy.get_param('/yolo_iou')
         self.save_output = rospy.get_param('/save_output')
         self.debug = rospy.get_param('/debug')
-        self.save_video = rospy.get_param('/output_video')
+        self.save_video = rospy.get_param('/save_video')
 
         self.det_img_out_dir = rospy.get_param('/detected_imgs_save_dir')
 
@@ -52,7 +52,8 @@ class TSDetections():
         img = img[:, :, ::-1]
         results = self.model(img, yolo_input_size)
         num_detections = len(results.xyxy[0])
-
+        
+        
         for i in range(num_detections):
             xmin = int(results.xyxy[0][i][0])
             ymin = int(results.xyxy[0][i][1])
@@ -110,6 +111,8 @@ class TSDetections():
                 cnt += 1
 
                 results = self.model(frame_yolo, self.model_size)
+                num_detections = len(results.xyxy[0])
+                print("Num of detected ts: ", num_detections)
                 color = (0,0,255)
                 thickness = 2
                 images = []

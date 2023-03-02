@@ -17,8 +17,8 @@ class ObjectDetection():
         bboxes_coords = []
         cropped_imgs = []
 
-        img = img[:, :, ::-1]
-        results = self.model(img, self.model_size)
+        img_yolo = img[:, :, ::-1]
+        results = self.model(img_yolo, self.model_size)
         num_detections = len(results.xyxy[0])
 
         for i in range(num_detections):
