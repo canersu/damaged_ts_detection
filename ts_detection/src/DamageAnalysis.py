@@ -42,3 +42,8 @@ class DamageAnalysis():
             damaged = True
         
         return damaged
+    
+    # ================================= TS ID TO NAME ======================================
+    def ts_id_to_name(self, class_id):
+        ts_name = self.iqa_data[class_id]["name"]
+        return ts_name
