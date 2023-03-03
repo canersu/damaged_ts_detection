@@ -28,7 +28,11 @@ class DamageAnalysis():
         img_tensor = tf.convert_to_tensor(resized_crop, dtype=tf.float32)
         dist_val = self.ae_.compMetric(img_tensor, gen, self.comp_metric)
 
-        return dist_val
+        gen_img_np = gen.reshape(48,48,3)
+        gen_img_np *= 255.0
+        gen_img = cv2.cvtColor(gen_img_np, cv2.COLOR_RGB2BGR)
+
+        return dist_val, gen_img
 
 
     # ================================= CHECK DAMAGE ======================================
@@ -43,7 +47,7 @@ class DamageAnalysis():
         
         return damaged
     
-    # ================================= TS ID TO NAME ======================================
+    # ================================= TS ID TO NAME =====================================
     def ts_id_to_name(self, class_id):
         ts_name = self.iqa_data[class_id]["name"]
         return ts_name

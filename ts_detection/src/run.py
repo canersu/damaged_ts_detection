@@ -13,6 +13,7 @@ import tensorflow as tf
 import yaml
 from ObjectDetection import ObjectDetection
 from DamageAnalysis import DamageAnalysis
+from LogManager import LogManager
 
 
 class TSDetections():
@@ -63,6 +64,11 @@ class TSDetections():
         comp_metric = rospy.get_param('/comp_metric')
         iqa_file = rospy.get_param('/iqa_file')
         self.DA = DamageAnalysis(iqa_file, comp_metric, ae_weight_file)
+
+        # Logging settings
+        self.log_root_dir = rospy.get_param('/log_root_dir')
+        self.lm = LogManager('/home/can/damaged_ts_detection/logs/')
+        self.lm.write_meta(self.input_file, model_size, conf_thresh, iou_thresh, comp_metric, self.sigma_multiplier)
     
 
     def write_text(self, img, text, coords):
@@ -70,11 +76,13 @@ class TSDetections():
 
 
     def run_detection(self):
+        frame_no = 0
         while(self.cap.isOpened()):
             ret, frame = self.cap.read()
             if ret == True:
-                #frame_yolo = frame[:, :, ::-1]
-                class_ids, conf_vals, bboxes_coords, num_detections, cropped_imgs = self.OD.detect_objects(frame)
+                gen_imgs = []
+                resized_crop_imgs = []
+                class_ids, conf_vals, bboxes_coords, num_detections, cropped_imgs, elapsed_time = self.OD.detect_objects(frame, False)
                 print("Num of detected ts: ", num_detections)
 
                 for i in range(num_detections):
@@ -89,9 +97,12 @@ class TSDetections():
                         ymax = bboxes_coords[i][3]
 
                     # Damage analysis
-                    dist_val = self.DA.measure_distance(crop_img)
+                    dist_val, gen_img = self.DA.measure_distance(crop_img)
                     is_damaged = self.DA.check_damage(self.sigma_multiplier, class_id, dist_val)
                     ts_name = self.DA.ts_id_to_name(class_id)
+
+                    resized_crop = cv2.resize(crop_img, (48,48), interpolation = cv2.INTER_AREA)
+                    gen_imgs.append(gen_img)
 
                     # Display information on frames
                     if (self.save_video == True) or (self.debug_stream == True):
@@ -104,13 +115,19 @@ class TSDetections():
                         else:
                             self.write_text(frame, "Not Damaged", (xmin, ymin-15))
 
-                
+                    resized_crop_imgs.append(resized_crop)
+
+
+                self.lm.save_images(resized_crop_imgs, gen_imgs, frame_no, num_detections)
+
+
                 if (self.save_video == True):
                     self.out_vid.write(frame)
                 if (self.debug_stream == True):
                     cv2.imshow("output", frame)
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         break
+                frame_no += 1
             else:
                 break
 
