@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import torch
+from time import time
 
 
 class ObjectDetection():
@@ -11,11 +12,14 @@ class ObjectDetection():
         self.model.iou = iou_thresh
 
     # =============================== OBJECT DETECTION ====================================
-    def detect_objects(self, img):
+    def detect_objects(self, img, normalized=False):
+        start_time = time()
         class_ids = []
         conf_vals = []
         bboxes_coords = []
         cropped_imgs = []
+        img_height = float(img.shape[0])
+        img_width = float(img.shape[1])
 
         img_yolo = img[:, :, ::-1]
         results = self.model(img_yolo, self.model_size)
@@ -29,7 +33,12 @@ class ObjectDetection():
             conf = float(results.xyxy[0][i][4])
             class_id = int(results.xyxy[0][i][5])
 
-            bbox_coords = [xmin, ymin, xmax, ymax]
+            if normalized:
+                bbox_coords = [xmin/img_width, ymin/img_height, 
+                               xmax/img_width, ymax/img_height]
+            else:
+                bbox_coords = [xmin, ymin, xmax, ymax]
+            
             crop = img[ymin:ymax, xmin:xmax]
 
             bboxes_coords.append(bbox_coords)
@@ -37,4 +46,9 @@ class ObjectDetection():
             conf_vals.append(conf)
             cropped_imgs.append(crop)
         
-        return class_ids, conf_vals, bboxes_coords, num_detections, cropped_imgs
+        end_time = time()
+
+        elapsed_time = end_time - start_time
+        elapsed_time = round(elapsed_time, 3)
+        
+        return class_ids, conf_vals, bboxes_coords, num_detections, cropped_imgs, elapsed_time
