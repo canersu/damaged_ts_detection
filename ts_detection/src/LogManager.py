@@ -61,9 +61,14 @@ class LogManager():
                    'comp_metric', 'threshold_value', 'comp_distance', 'is_damaged',
                    'yolo_detection_time', 'damage_analysis_time', 'total_processing_time']
         
-        with open(self.log_file , 'w', newline='') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=columns)
-            writer.writeheader()
+        if not os.path.exists(self.log_file):
+            with open(self.log_file , 'w', newline='') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=columns)
+                writer.writeheader()
+        else:
+            print(f"{filename} already exists, so it was not created.")
+
+
 
 # if __name__ == '__main__':
 #     lm = LogManager('/home/can/damaged_ts_detection/logs/')
