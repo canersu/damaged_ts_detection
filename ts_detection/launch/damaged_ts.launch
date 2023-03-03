@@ -15,4 +15,5 @@
   <param name= '/iqa_file' type = 'str' value = '/home/can/damaged_ts_detection/src/ts_detection/iqa.yaml'/>
   <param name= '/comp_metric' type = 'str' value = 'ssim'/>
   <param name='/sigma_multiplier' type='double' value='2.0'/>
+  <param name= '/log_root_dir' type = 'str' value = '/home/can/damaged_ts_detection/logs/'/>
 </launch>
