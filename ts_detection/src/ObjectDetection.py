@@ -31,6 +31,7 @@ class ObjectDetection():
             xmax = int(results.xyxy[0][i][2])
             ymax = int(results.xyxy[0][i][3])
             conf = float(results.xyxy[0][i][4])
+            conf = round(conf, 3)
             class_id = int(results.xyxy[0][i][5])
 
             if normalized:

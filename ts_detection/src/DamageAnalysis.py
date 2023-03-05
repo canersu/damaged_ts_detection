@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-import torch
 import yaml
 import cv2
 import tensorflow as tf
 import ae
-
+from time import time
 
 class DamageAnalysis():
     # ===================================== INIT ==========================================
@@ -20,6 +19,7 @@ class DamageAnalysis():
     
     # =============================== MEASURE DISTANCE ====================================
     def measure_distance(self, crop_img):
+        start_time = time()
         crop_rgb = cv2.cvtColor(crop_img, cv2.COLOR_BGR2RGB)
         crop_rgb = crop_rgb/255.0
         resized_crop = cv2.resize(crop_rgb, (48,48), interpolation = cv2.INTER_AREA)
@@ -27,12 +27,17 @@ class DamageAnalysis():
         gen = self.ae_model.predict(resized_crop)
         img_tensor = tf.convert_to_tensor(resized_crop, dtype=tf.float32)
         dist_val = self.ae_.compMetric(img_tensor, gen, self.comp_metric)
+        dist_val = round(dist_val, 3)
 
         gen_img_np = gen.reshape(48,48,3)
         gen_img_np *= 255.0
         gen_img = cv2.cvtColor(gen_img_np, cv2.COLOR_RGB2BGR)
 
-        return dist_val, gen_img
+        end_time = time()
+        elapsed_time = end_time - start_time
+        elapsed_time = round(elapsed_time, 3)
+
+        return dist_val, gen_img, elapsed_time
 
 
     # ================================= CHECK DAMAGE ======================================
@@ -41,11 +46,12 @@ class DamageAnalysis():
         mean = self.iqa_data[class_id][self.comp_metric]["mean"]
         sigma = self.iqa_data[class_id][self.comp_metric]["sigma"]
         threshold = mean + sigma_multiplier*sigma
+        threshold = round(threshold, 3)
         
         if distance > threshold:
             damaged = True
         
-        return damaged
+        return damaged, threshold
     
     # ================================= TS ID TO NAME =====================================
     def ts_id_to_name(self, class_id):
