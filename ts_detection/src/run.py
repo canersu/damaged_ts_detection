@@ -2,15 +2,6 @@
 import rospy
 import cv2
 import numpy as np
-from sensor_msgs.msg import Image
-from cv_bridge import CvBridge, CvBridgeError
-import torch
-import time
-from ts_detection.msg import frame_info, detections, detection_info
-from std_msgs.msg import Header
-import ae
-import tensorflow as tf
-import yaml
 from ObjectDetection import ObjectDetection
 from DamageAnalysis import DamageAnalysis
 from LogManager import LogManager
@@ -35,18 +26,6 @@ class TSDetections():
         self.debug_stream = rospy.get_param('/debug')
         self.save_output = rospy.get_param('/save_output')
         self.input_file = rospy.get_param('/input_source')
-
-        # # Opencv and frame settings
-        # self.cap = cv2.VideoCapture(self.input_file)
-        # frame_width = int(self.cap.get(3))
-        # frame_height = int(self.cap.get(4))
-        # vid_fps =(int(self.cap.get(cv2.CAP_PROP_FPS)))
-
-        # self.out_vid = cv2.VideoWriter(video_save_dir, 
-        #                                cv2.VideoWriter_fourcc('M','J','P','G'), 
-        #                                vid_fps, 
-        #                                (frame_width,frame_height))
-    
 
         # Font settings
         self.font = cv2.FONT_HERSHEY_SIMPLEX
@@ -88,6 +67,8 @@ class TSDetections():
 
     def run_detection(self):
         frame_no = 0
+        resized_crop = np.zeros((224, 224, 3), np.uint8)
+        gen_img = np.zeros((224, 224, 3), np.uint8)
         while(self.cap.isOpened()):
             ret, frame = self.cap.read()
             if ret == True:
@@ -141,9 +122,21 @@ class TSDetections():
 
 
                 if (self.save_video == True):
-                    self.out_vid.write(frame)
+                    resized_frame = cv2.resize(frame, (1680, 960))
+                    blank_image = np.zeros((1080, 1920, 3), np.uint8)
+                    blank_image[0:960, 240:1920] = resized_frame
+                    x_offset = 5
+                    y_offset = 5
+                    y_offset_gen = y_offset + 224
+                    resized_crop = cv2.resize(resized_crop, (224,224))
+                    resized_gen = cv2.resize(gen_img, (224,224))
+                    blank_image[y_offset:y_offset+resized_crop.shape[0], x_offset:x_offset+resized_crop.shape[1]] = resized_crop
+                    blank_image[y_offset_gen:y_offset_gen+resized_gen.shape[0], x_offset:x_offset+resized_gen.shape[1]] = resized_gen
+
+                    self.out_vid.write(blank_image)
                 if (self.debug_stream == True):
-                    cv2.imshow("output", frame)
+                    cv2.imshow("output", blank_image)
+                    # cv2.imshow("output", frame)
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         break
                 frame_no += 1
@@ -157,7 +150,6 @@ class TSDetections():
 if __name__ == '__main__':
     try:
         img_detect = TSDetections()
-        time.sleep(2)
         img_detect.run_detection()
     except rospy.ROSInterruptException:
         pass
