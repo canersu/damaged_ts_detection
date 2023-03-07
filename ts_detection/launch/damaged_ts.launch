@@ -2,7 +2,10 @@
   <node name="DetectionNode" pkg="ts_detection" type="run.py" output="screen"/>
   <param name='/yolo_weight_file' type='str' value='/home/can/desktop_thesis/results/yolov5/yolov5l/weights/best.pt'/>
   <param name='/yolo_dir' type='str' value='/home/can/desktop_thesis/yolov5'/>
-  <param name='/input_source' type='str' value='/home/can/desktop_thesis/notebooks/sample_video_01_cut.mp4'/>
+  <!--param name='/input_source' type='str' value='/home/can/desktop_thesis/notebooks/sample_video_01_cut.mp4'/-->
+  <!--param name='/input_source' type='str' value='/home/can/Desktop/uljana_dashcam/Normal/FILE221114-093229-000260.MOV'/-->
+  <!-- <param name='/input_source' type='str' value='/home/can/Desktop/uljana_dashcam/Normal/FILE221114-093730-000265.MOV'/> -->
+  <param name='/input_source' type='str' value='/home/can/Desktop/uljana_dashcam/Normal/FILE221114-183908-000271.MOV'/>
   <param name='/yolo_input_size' type='int' value='640'/>
   <param name='/yolo_confidence' type='double' value='0.8'/>
   <param name='/yolo_iou' type='double' value='0.9'/>
