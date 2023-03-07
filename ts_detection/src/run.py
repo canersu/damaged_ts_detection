@@ -59,6 +59,15 @@ class TSDetections():
                                        cv2.VideoWriter_fourcc('M','J','P','G'), 
                                        vid_fps, 
                                        (frame_width,frame_height))
+        
+        # Live detected sign display settings
+        self.x_offset = 18
+        self.y_offset = 18
+        self.img_offset = 6
+        self.orig_img_resize = 128
+        self.gen_img_resize = 128
+        self.frame_width = 1620
+        self.frame_height = 1080
     
 
     def write_text(self, img, text, coords):
@@ -122,18 +131,21 @@ class TSDetections():
 
 
                 if (self.save_video == True):
-                    resized_frame = cv2.resize(frame, (1680, 960))
+                    resized_frame = cv2.resize(frame, (self.frame_width, self.frame_height))
                     blank_image = np.zeros((1080, 1920, 3), np.uint8)
-                    blank_image[0:960, 240:1920] = resized_frame
-                    x_offset = 5
-                    y_offset = 5
-                    y_offset_gen = y_offset + 224
-                    resized_crop = cv2.resize(resized_crop, (224,224))
-                    resized_gen = cv2.resize(gen_img, (224,224))
-                    blank_image[y_offset:y_offset+resized_crop.shape[0], x_offset:x_offset+resized_crop.shape[1]] = resized_crop
-                    blank_image[y_offset_gen:y_offset_gen+resized_gen.shape[0], x_offset:x_offset+resized_gen.shape[1]] = resized_gen
+                    blank_image[0:self.frame_height, 300:1920] = resized_frame
+                    for k in range(num_detections):
+                        x_offset_orig = self.x_offset
+                        x_offset_gen = self.x_offset + self.orig_img_resize + self.img_offset
+                        y_offset = self.y_offset + (k * self.orig_img_resize)
+                        resized_crop = cv2.resize(resized_crop_imgs[k], (self.orig_img_resize,self.orig_img_resize))
+                        resized_gen = cv2.resize(gen_imgs[k], (self.gen_img_resize,self.gen_img_resize))
+                        blank_image[y_offset:y_offset+resized_crop.shape[0], x_offset_orig:x_offset_orig+resized_crop.shape[1]] = resized_crop # orig
+                        blank_image[y_offset:y_offset+resized_gen.shape[0], x_offset_gen:x_offset_gen+resized_gen.shape[1]] = resized_gen # gen
 
+                    self.write_text(blank_image, 'Frame No: ' + str(frame_no), (0,960))
                     self.out_vid.write(blank_image)
+
                 if (self.debug_stream == True):
                     cv2.imshow("output", blank_image)
                     # cv2.imshow("output", frame)
