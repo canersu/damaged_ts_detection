@@ -148,7 +148,6 @@ class TSDetections():
 
                 if (self.debug_stream == True):
                     cv2.imshow("output", blank_image)
-                    # cv2.imshow("output", frame)
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         break
                 frame_no += 1
