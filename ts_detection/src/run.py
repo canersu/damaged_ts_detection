@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import rospy
+# import rospy
 import cv2
 import numpy as np
 from ObjectDetection import ObjectDetection
@@ -10,22 +10,22 @@ from LogManager import LogManager
 class TSDetections():
     # ===================================== INIT==========================================
     def __init__(self):
-        rospy.init_node('DetectionNode', anonymous=True)
+        # rospy.init_node('DetectionNode', anonymous=True)
 
         # YOLO object detection configurations
-        yolo_model = rospy.get_param('/yolo_weight_file')
-        yolo_path = rospy.get_param('/yolo_dir')
-        model_size = rospy.get_param('/yolo_input_size')
-        conf_thresh = rospy.get_param('/yolo_confidence')
-        iou_thresh = rospy.get_param('/yolo_iou')
+        yolo_model = '/home/can/desktop_thesis/results/yolov5/yolov5l/weights/best.pt' # rospy.get_param('/yolo_weight_file')
+        yolo_path = '/home/can/desktop_thesis/yolov5' # rospy.get_param('/yolo_dir')
+        model_size = 640 # rospy.get_param('/yolo_input_size')
+        conf_thresh = 0.8 # rospy.get_param('/yolo_confidence')
+        iou_thresh = 0.9 # rospy.get_param('/yolo_iou')
         self.OD = ObjectDetection(yolo_path, yolo_model, model_size, conf_thresh, iou_thresh)
 
         # Video input/output configurations
-        video_save_dir = rospy.get_param('/video_output_path')
-        self.save_video = rospy.get_param('/save_video')
-        self.debug_stream = rospy.get_param('/debug')
-        self.save_output = rospy.get_param('/save_output')
-        self.input_file = rospy.get_param('/input_source')
+        video_save_dir = '/home/can/desktop_thesis/out_vid.avi' # rospy.get_param('/video_output_path')
+        self.save_video = True # rospy.get_param('/save_video')
+        self.debug_stream = True # rospy.get_param('/debug')
+        self.save_output = False # rospy.get_param('/save_output')
+        self.input_file = '/home/can/Desktop/uljana_dashcam/Normal/FILE221114-183908-000271.MOV' # rospy.get_param('/input_source')
 
         # Font settings
         self.font = cv2.FONT_HERSHEY_SIMPLEX
@@ -38,14 +38,14 @@ class TSDetections():
         self.bbox_thickness = 2
 
         # Autoencoder configurations for damage analysis
-        self.sigma_multiplier = rospy.get_param('/sigma_multiplier')
-        ae_weight_file = rospy.get_param('/autoencoder_model')
-        self.comp_metric = rospy.get_param('/comp_metric')
-        iqa_file = rospy.get_param('/iqa_file')
+        self.sigma_multiplier = 2.0 # rospy.get_param('/sigma_multiplier')
+        ae_weight_file = '/home/can/desktop_thesis/ae_weights/cropped_allfullmodel1mse.h5' # rospy.get_param('/autoencoder_model')
+        self.comp_metric = 'ssim' # rospy.get_param('/comp_metric')
+        iqa_file = '/home/can/damaged_ts_detection/src/ts_detection/iqa.yaml' # rospy.get_param('/iqa_file')
         self.DA = DamageAnalysis(iqa_file, self.comp_metric, ae_weight_file)
 
         # Logging settings
-        self.log_root_dir = rospy.get_param('/log_root_dir')
+        self.log_root_dir = '/home/can/damaged_ts_detection/logs/' # rospy.get_param('/log_root_dir')
         self.lm = LogManager('/home/can/damaged_ts_detection/logs/')
         self.lm.write_meta(self.input_file, model_size, conf_thresh, iou_thresh, self.comp_metric, self.sigma_multiplier)
 
@@ -159,10 +159,10 @@ class TSDetections():
         self.out_vid.release()
 
 if __name__ == '__main__':
-    try:
-        img_detect = TSDetections()
-        img_detect.run_detection()
-    except rospy.ROSInterruptException:
-        pass
+    # try:
+    img_detect = TSDetections()
+    img_detect.run_detection()
+    # except rospy.ROSInterruptException:
+    #     pass
     
-    rospy.spin()
+    # rospy.spin()
