@@ -5,6 +5,7 @@ import numpy as np
 from ObjectDetection import ObjectDetection
 from DamageAnalysis import DamageAnalysis
 from LogManager import LogManager
+from TSClassifier import TSClassifier
 
 
 class TSDetections():
@@ -13,19 +14,28 @@ class TSDetections():
         # rospy.init_node('DetectionNode', anonymous=True)
 
         # YOLO object detection configurations
-        yolo_model = '/home/can/desktop_thesis/results/yolov5/yolov5l/weights/best.pt' # rospy.get_param('/yolo_weight_file')
-        yolo_path = '/home/can/desktop_thesis/yolov5' # rospy.get_param('/yolo_dir')
-        model_size = 640 # rospy.get_param('/yolo_input_size')
-        conf_thresh = 0.8 # rospy.get_param('/yolo_confidence')
-        iou_thresh = 0.9 # rospy.get_param('/yolo_iou')
-        self.OD = ObjectDetection(yolo_path, yolo_model, model_size, conf_thresh, iou_thresh)
+        det_yolo_model = '/home/can/storage/weight_files/damaged_ts/results/yolov5/yolov5l/weights/best.pt' # rospy.get_param('/yolo_weight_file')
+        # yolo_path = '/home/can/external_libraries/yolov5' # rospy.get_param('/yolo_dir')
+        det_model_size = 640 # rospy.get_param('/yolo_input_size')
+        det_conf_thresh = 0.8 # rospy.get_param('/yolo_confidence')
+        det_iou_thresh = 0.9 # rospy.get_param('/yolo_iou')
+        self.OD = ObjectDetection(det_yolo_model, det_model_size, det_conf_thresh, det_iou_thresh)
+        
+        
+        # YOLO object classification configurations
+        cls_yolo_model = '/home/can/storage/weight_files/damaged_ts/results/yolov5/yolov5l/weights/best.pt' # rospy.get_param('/yolo_weight_file')
+        # yolo_path = '/home/can/external_libraries/yolov5' # rospy.get_param('/yolo_dir')
+        cls_model_size = 64 # rospy.get_param('/yolo_input_size')
+        cls_conf_thresh = 0.8 # rospy.get_param('/yolo_confidence')
+        cls_iou_thresh = 0.9 # rospy.get_param('/yolo_iou')
+        self.TSC = TSClassifier(cls_yolo_model, cls_model_size, cls_conf_thresh, cls_iou_thresh)
 
         # Video input/output configurations
-        video_save_dir = '/home/can/desktop_thesis/out_vid.avi' # rospy.get_param('/video_output_path')
+        # video_save_dir = '/home/can/desktop_thesis/out_vid.avi' # rospy.get_param('/video_output_path')
         self.save_video = True # rospy.get_param('/save_video')
         self.debug_stream = True # rospy.get_param('/debug')
         self.save_output = False # rospy.get_param('/save_output')
-        self.input_file = '/home/can/Desktop/uljana_dashcam/Normal/FILE221114-183908-000271.MOV' # rospy.get_param('/input_source')
+        self.input_file = '/home/can/storage/videos/damaged_ts/uljana_dashcam/Normal/FILE221114-183908-000271.MOV' # rospy.get_param('/input_source')
 
         # Font settings
         self.font = cv2.FONT_HERSHEY_SIMPLEX
@@ -39,14 +49,14 @@ class TSDetections():
 
         # Autoencoder configurations for damage analysis
         self.sigma_multiplier = 2.0 # rospy.get_param('/sigma_multiplier')
-        ae_weight_file = '/home/can/desktop_thesis/ae_weights/cropped_allfullmodel1mse.h5' # rospy.get_param('/autoencoder_model')
+        ae_weight_file = '/home/can/storage/weight_files/damaged_ts/ae_weights/cropped_allfullmodel1mse.h5' # rospy.get_param('/autoencoder_model')
         self.comp_metric = 'ssim' # rospy.get_param('/comp_metric')
-        iqa_file = '/home/can/damaged_ts_detection/src/ts_detection/iqa.yaml' # rospy.get_param('/iqa_file')
+        iqa_file = '/home/can/damaged_ts_ws/damaged_ts_detection/ts_detection/iqa.yaml' # rospy.get_param('/iqa_file')
         self.DA = DamageAnalysis(iqa_file, self.comp_metric, ae_weight_file)
 
         # Logging settings
-        self.log_root_dir = '/home/can/damaged_ts_detection/logs/' # rospy.get_param('/log_root_dir')
-        self.lm = LogManager('/home/can/damaged_ts_detection/logs/')
+        self.log_root_dir = '/home/can/storage/logs/damaged_ts/' # rospy.get_param('/log_root_dir')
+        self.lm = LogManager(self.log_root_dir)
         self.lm.write_meta(self.input_file, model_size, conf_thresh, iou_thresh, self.comp_metric, self.sigma_multiplier)
 
         # Opencv and frame settings
