@@ -12,20 +12,23 @@ class TSClassifier():
         self.conf_cls_thresh = conf_cls_thresh
         self.iou_cls_thresh = iou_cls_thresh
 
-    def classify_objects(self, img, normalized=False):
+    def classify_objects(self, img):
         start_time = time()
         
-        results = self.model(img,
-                                conf=self.conf_thresh, 
+        results = self.model_cls(img,
+                                conf=self.conf_cls_thresh, 
                                 # half=True,
                                 device=0,
-                                iou=self.iou_thresh,
-                                imgsz=self.model_size)
+                                iou=self.iou_cls_thresh,
+                                imgsz=self.model_cls_size)
         
         
+        boxes = results[0].boxes
+        num_cls = len(results[0])
+        cls_id = boxes.cls.to('cpu').numpy()
+        cls_conf = boxes.conf.to('cpu').numpy()
         end_time = time()
-
         elapsed_time = end_time - start_time
         elapsed_time = round(elapsed_time, 3)
         
-        return boxes.cls.to('cpu').numpy(), boxes.conf.to('cpu').numpy(), elapsed_time
+        return cls_id, cls_conf, elapsed_time, num_cls
