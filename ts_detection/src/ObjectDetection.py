@@ -15,14 +15,15 @@ class ObjectDetection():
     # =============================== OBJECT DETECTION ====================================
     def detect_objects(self, img, normalized=False):
         start_time = time()
+        cropped_imgs = []
         num_detections = 0
         
-        results = self.model(img,
-                                   conf=self.conf_thresh, 
+        results = self.model_det(img,
+                                   conf=self.conf_det_thresh, 
                                    # half=True,
                                    device=0,
-                                   iou=self.iou_thresh,
-                                   imgsz=self.model_size)
+                                   iou=self.iou_det_thresh,
+                                   imgsz=self.model_det_size)
         boxes = results[0].boxes
         num_detections = len(results[0])
         print('********************* num detections : '+str(num_detections)+'*********************')
@@ -32,10 +33,19 @@ class ObjectDetection():
             bbox_coords = boxes.xyxy.to('cpu').numpy()
         print('********************* bboxcoords : '+str(bbox_coords)+'*********************')
         
+        
+        for i in range(num_detections):
+            xmin = int(bbox_coords[i][0])
+            ymin = int(bbox_coords[i][1])
+            xmax = int(bbox_coords[i][2])
+            ymax = int(bbox_coords[i][3])
+            crop = img[ymin:ymax, xmin:xmax]
+            cropped_imgs.append(crop)
+        
         end_time = time()
 
         elapsed_time = end_time - start_time
         elapsed_time = round(elapsed_time, 3)
         
-        return boxes.cls.to('cpu').numpy(), boxes.conf.to('cpu').numpy(), bbox_coords, num_detections, elapsed_time
+        return boxes.conf.to('cpu').numpy(), bbox_coords, num_detections, cropped_imgs, elapsed_time
 
