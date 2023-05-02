@@ -21,8 +21,8 @@ class LogManager():
         os.mkdir(self.gen_img_dir)
 
         # Create the log file
-        self.columns = ['frame_no', 'detected_class_id', 'detected_class', 'confidence',
-                   'comp_metric', 'threshold_value', 'comp_distance', 'is_damaged',
+        self.columns = ['frame_no', 'detected_class_id', 'detected_class', 'confidence_det',
+                   'confidence_cls', 'comp_metric', 'threshold_value', 'comp_distance', 'is_damaged',
                    'yolo_detection_time', 'damage_analysis_time', 'total_processing_time']
         
         self.log_file = self.folder_name + '/logs.csv'
@@ -36,13 +36,18 @@ class LogManager():
             pass
 
 
-    def write_meta(self, input_vid_name, yolo_input_size, yolo_conf_thresh, 
-                   yolo_iou_thresh, comp_metric, sigma_multiplier):
+    def write_meta(self, input_vid_name, yolo_input_size_det,
+                   yolo_conf_thresh_det, yolo_iou_thresh_det,
+                   yolo_input_size_cls, yolo_conf_thresh_cls,
+                   yolo_iou_thresh_cls, comp_metric, sigma_multiplier):
         rows = [
             ['Video name: ' + input_vid_name],
-            ['YOLO input size: ' + str(yolo_input_size)],
-            ['YOLO confidence threshold: ' + str(yolo_conf_thresh)],
-            ['YOLO IOU threshold: ' + str(yolo_iou_thresh)],
+            ['YOLO detection input size: ' + str(yolo_input_size_det)],
+            ['YOLO classification input size: ' + str(yolo_input_size_cls)],
+            ['YOLO detection confidence threshold: ' + str(yolo_conf_thresh_det)],
+            ['YOLO classification confidence threshold: ' + str(yolo_conf_thresh_cls)],
+            ['YOLO detection IOU threshold: ' + str(yolo_iou_thresh_det)],
+            ['YOLO classification IOU threshold: ' + str(yolo_iou_thresh_cls)],
             ['Comparison metric: ' + comp_metric],
             ['Sigma multiplier: ' + str(sigma_multiplier)]
         ]
@@ -58,13 +63,14 @@ class LogManager():
             cv2.imwrite(self.gen_img_dir+str(frame_no)+'_'+str(i)+'.png', gen_imgs[i])
 
  
-    def log_frame_info(self, confidence, detected_class, detected_class_id, yolo_detection_time, 
+    def log_frame_info(self, confidence_det, confidence_cls, detected_class, detected_class_id, yolo_detection_time, 
                        frame_no, comp_metric, comp_distance, damage_analysis_time, 
                        threshold_value, is_damaged, total_processing_time):
         with open(self.log_file , 'a') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=self.columns)
             writer.writerow({'frame_no': str(frame_no), 'detected_class_id': str(detected_class_id), 
-                                'detected_class': detected_class, 'confidence': str(confidence),
+                                'detected_class': detected_class, 'confidence_det': str(confidence_det),
+                                'confidence_cls': str(confidence_cls),
                                 'comp_metric': comp_metric, 'threshold_value': str(threshold_value), 
                                 'comp_distance': str(comp_distance), 'is_damaged': str(is_damaged), 
                                 'yolo_detection_time': str(yolo_detection_time), 

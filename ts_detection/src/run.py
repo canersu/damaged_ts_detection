@@ -14,20 +14,20 @@ class TSDetections():
         # rospy.init_node('DetectionNode', anonymous=True)
 
         # YOLO object detection configurations
-        det_yolo_model = '/home/can/storage/weight_files/damaged_ts/results/yolov5/yolov5l/weights/best.pt' # rospy.get_param('/yolo_weight_file')
+        det_yolo_model = '/home/can/storage/weight_files/damaged_ts/yolov8m_gtsdb_07_015_015/weights/best.pt' # rospy.get_param('/yolo_weight_file')
         # yolo_path = '/home/can/external_libraries/yolov5' # rospy.get_param('/yolo_dir')
         det_model_size = 640 # rospy.get_param('/yolo_input_size')
-        det_conf_thresh = 0.8 # rospy.get_param('/yolo_confidence')
-        det_iou_thresh = 0.9 # rospy.get_param('/yolo_iou')
+        det_conf_thresh = 0.6 # rospy.get_param('/yolo_confidence')
+        det_iou_thresh = 0.6 # rospy.get_param('/yolo_iou')
         self.OD = ObjectDetection(det_yolo_model, det_model_size, det_conf_thresh, det_iou_thresh)
         
         
         # YOLO object classification configurations
-        cls_yolo_model = '/home/can/storage/weight_files/damaged_ts/results/yolov5/yolov5l/weights/best.pt' # rospy.get_param('/yolo_weight_file')
+        cls_yolo_model = '/home/can/storage/weight_files/damaged_ts/yolov8n_gtsrb/weights/best.pt' # rospy.get_param('/yolo_weight_file')
         # yolo_path = '/home/can/external_libraries/yolov5' # rospy.get_param('/yolo_dir')
         cls_model_size = 64 # rospy.get_param('/yolo_input_size')
-        cls_conf_thresh = 0.8 # rospy.get_param('/yolo_confidence')
-        cls_iou_thresh = 0.9 # rospy.get_param('/yolo_iou')
+        cls_conf_thresh = 0.7 # rospy.get_param('/yolo_confidence')
+        cls_iou_thresh = 0.7 # rospy.get_param('/yolo_iou')
         self.TSC = TSClassifier(cls_yolo_model, cls_model_size, cls_conf_thresh, cls_iou_thresh)
 
         # Video input/output configurations
@@ -57,7 +57,8 @@ class TSDetections():
         # Logging settings
         self.log_root_dir = '/home/can/storage/logs/damaged_ts/' # rospy.get_param('/log_root_dir')
         self.lm = LogManager(self.log_root_dir)
-        self.lm.write_meta(self.input_file, model_size, conf_thresh, iou_thresh, self.comp_metric, self.sigma_multiplier)
+        self.lm.write_meta(self.input_file, det_model_size, det_conf_thresh, det_iou_thresh, cls_model_size, 
+                           cls_conf_thresh, cls_iou_thresh, self.comp_metric, self.sigma_multiplier)
 
         # Opencv and frame settings
         self.cap = cv2.VideoCapture(self.input_file)
@@ -93,20 +94,40 @@ class TSDetections():
             if ret == True:
                 gen_imgs = []
                 resized_crop_imgs = []
-                class_ids, conf_vals, bboxes_coords, num_detections, cropped_imgs, yolo_elapsed_time = self.OD.detect_objects(frame, False)
-                print("Num of detected ts: ", num_detections)
+                cropped_imgs = []
+                bboxes_coords = []
+                conf_vals = []
+                conf_cls_vals = []
+                class_ids = []
+                num_detections = 0
+                raw_conf_vals, raw_bboxes_coords, raw_num_detections, raw_cropped_imgs, yolo_elapsed_time = self.OD.detect_objects(frame, False)
+                print("Num of raw detected ts: ", raw_num_detections)
+                for i in range(raw_num_detections):
+                    crop_img = raw_cropped_imgs[i]
+                    raw_class_ids, cls_conf_val, cls_elapsed_time, num_cls = self.TSC.classify_objects(crop_img)
+                    if num_cls !=0:
+                        print(str(int(raw_class_ids[0])))
+                        class_id = int(raw_class_ids[0])
+                        class_ids.append(class_id)
+                        cropped_imgs.append(raw_cropped_imgs[i])
+                        conf_vals.append(raw_conf_vals[i])
+                        bboxes_coords.append(raw_bboxes_coords[i])
+                        conf_cls_vals.append(cls_conf_val)
+                        num_detections += 1
+                        
 
                 for i in range(num_detections):
                     # YOLO detection outputs
                     class_id = class_ids[i]
                     crop_img = cropped_imgs[i]
                     conf_val = conf_vals[i]
+                    cls_conf_val = conf_cls_vals[i]
                     if (self.save_video == True) or (self.debug_stream == True):
                         
-                        xmin = bboxes_coords[i][0]
-                        ymin = bboxes_coords[i][1]
-                        xmax = bboxes_coords[i][2]
-                        ymax = bboxes_coords[i][3]
+                        xmin = int(bboxes_coords[i][0])
+                        ymin = int(bboxes_coords[i][1])
+                        xmax = int(bboxes_coords[i][2])
+                        ymax = int(bboxes_coords[i][3])
 
                     # Damage analysis
                     dist_val, gen_img, ae_elapsed_time = self.DA.measure_distance(crop_img)
@@ -132,7 +153,7 @@ class TSDetections():
                     # Log the detected traffic sign
                     total_processing_time = yolo_elapsed_time + ae_elapsed_time
                     total_processing_time = round(total_processing_time, 3)
-                    self.lm.log_frame_info(conf_val, ts_name, class_id, yolo_elapsed_time, 
+                    self.lm.log_frame_info(conf_val, cls_conf_val, ts_name, class_id, yolo_elapsed_time, 
                                            frame_no, self.comp_metric, dist_val, ae_elapsed_time, 
                                            threshold, is_damaged, total_processing_time)
 
