@@ -6,17 +6,16 @@ import numpy as np
 
 class TSClassifier():
     # ===================================== INIT ==========================================
-    def __init__(self, yolo_cls_model, input_cls_size, conf_cls_thresh, iou_cls_thresh):
+    def __init__(self, yolo_cls_model, input_cls_size, iou_cls_thresh):
         self.model_cls = YOLO(yolo_cls_model)  # load a pretrained model
         self.model_cls_size = input_cls_size
-        self.conf_cls_thresh = conf_cls_thresh
         self.iou_cls_thresh = iou_cls_thresh
 
-    def classify_objects(self, img):
+    def classify_objects(self, img, conf_thresh):
         start_time = time()
         
         results = self.model_cls(img,
-                                conf=self.conf_cls_thresh, 
+                                conf=conf_thresh, 
                                 # half=True,
                                 device=0,
                                 iou=self.iou_cls_thresh,

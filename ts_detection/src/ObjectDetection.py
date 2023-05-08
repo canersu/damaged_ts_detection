@@ -26,13 +26,10 @@ class ObjectDetection():
                                    imgsz=self.model_det_size)
         boxes = results[0].boxes
         num_detections = len(results[0])
-        print('********************* num detections : '+str(num_detections)+'*********************')
         if normalized:
             bbox_coords = boxes.xyxyn.to('cpu').numpy()
         else:
             bbox_coords = boxes.xyxy.to('cpu').numpy()
-        print('********************* bboxcoords : '+str(bbox_coords)+'*********************')
-        
         
         for i in range(num_detections):
             xmin = int(bbox_coords[i][0])
