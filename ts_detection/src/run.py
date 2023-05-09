@@ -14,7 +14,7 @@ class TSDetections():
         # rospy.init_node('DetectionNode', anonymous=True)
 
         # YOLO object detection configurations
-        det_yolo_model = '/home/can/storage/weight_files/damaged_ts/yolov8m_gtsdb_07_015_015/weights/best.pt' # rospy.get_param('/yolo_weight_file')
+        det_yolo_model = '/home/can/storage/weight_files/damaged_ts/yolov8x_gtsdb_07_015_015/weights/best.pt' # rospy.get_param('/yolo_weight_file')
         # yolo_path = '/home/can/external_libraries/yolov5' # rospy.get_param('/yolo_dir')
         det_model_size = 1280 # rospy.get_param('/yolo_input_size')
         det_conf_thresh = 0.6 # rospy.get_param('/yolo_confidence')
@@ -23,7 +23,7 @@ class TSDetections():
         
         
         # YOLO object classification configurations
-        cls_yolo_model = '/home/can/storage/weight_files/damaged_ts/yolov8n_gtsrb/weights/best.pt' # rospy.get_param('/yolo_weight_file')
+        cls_yolo_model = '/home/can/storage/weight_files/damaged_ts/yolov8x_gtsrb/weights/best.pt' # rospy.get_param('/yolo_weight_file')
         # yolo_path = '/home/can/external_libraries/yolov5' # rospy.get_param('/yolo_dir')
         cls_model_size = 64 # rospy.get_param('/yolo_input_size')
         self.cls_conf_thresh = 0.7 # rospy.get_param('/yolo_confidence')
@@ -37,7 +37,7 @@ class TSDetections():
         self.debug_stream = True # rospy.get_param('/debug')
         self.save_output = False # rospy.get_param('/save_output')
         # self.input_file = '/home/can/storage/videos/damaged_ts/uljana_dashcam/Normal/FILE221114-183908-000271.MOV' # rospy.get_param('/input_source')
-        self.input_file = '/home/can/storage/videos/damaged_ts/koblenz/koblenz_clip4.webm'
+        self.input_file = '/home/can/storage/videos/damaged_ts/koblenz/koblenz_clip1.webm'
         # Font settings
         self.font = cv2.FONT_HERSHEY_SIMPLEX
         self.font_scale = 1.25 # 0.75
@@ -85,8 +85,8 @@ class TSDetections():
     def write_text(self, img, text, coords):
         # cv2.putText(img, text, coords, self.font, self.font_scale, self.font_color, self.font_thickness, cv2.LINE_AA)
         new_img = img
-        new_img = cv2.putText(new_img, text, coords, cv2.FONT_HERSHEY_SIMPLEX, self.font_scale, (255,255,255), self.font_thickness * 4)
-        cv2.putText(new_img, text, coords, cv2.FONT_HERSHEY_SIMPLEX, self.font_scale, (0,0,0), self.font_thickness)
+        new_img = cv2.putText(new_img, text, coords, cv2.FONT_HERSHEY_SIMPLEX, self.font_scale, (0,0,0), self.font_thickness * 10)
+        cv2.putText(new_img, text, coords, cv2.FONT_HERSHEY_SIMPLEX, self.font_scale, (255,255,255), self.font_thickness * 2)
         return new_img
 
     def run_detection(self):
@@ -104,6 +104,10 @@ class TSDetections():
                 conf_vals = []
                 conf_cls_vals = []
                 class_ids = []
+                dist_vals = []
+                verifieds = []
+                gen_class_ids = []
+                is_damageds = []
                 num_detections = 0
                 raw_conf_vals, raw_bboxes_coords, raw_num_detections, raw_cropped_imgs, yolo_elapsed_time = self.OD.detect_objects(x_new_frame, False)
                 print("Num of raw detected ts: ", raw_num_detections)
@@ -136,6 +140,7 @@ class TSDetections():
                     dist_val, gen_img, ae_elapsed_time = self.DA.measure_distance(crop_img)
                     is_damaged, threshold = self.DA.check_damage(self.sigma_multiplier, class_id, dist_val)
                     ts_name = self.DA.ts_id_to_name(class_id)
+                    dist_vals.append(dist_val)
                     
                     # Verify if the detected sign class and generated sign class are the same
                     gen_class_id, gen_cls_conf_val, cls_elapsed_time, gen_num_cls = self.TSC.classify_objects(gen_img,self.gen_cls_conf_thresh)
@@ -152,6 +157,10 @@ class TSDetections():
                     resized_crop = cv2.resize(crop_img, (48,48), interpolation = cv2.INTER_AREA)
                     gen_imgs.append(gen_img)
                     resized_crop_imgs.append(resized_crop)
+                    
+                    verifieds.append(log_verified)
+                    gen_class_ids.append(gen_class_id)
+                    is_damageds.append(is_damaged)
 
 
                     # Log the detected traffic sign
@@ -166,20 +175,40 @@ class TSDetections():
                 self.lm.save_images(resized_crop_imgs, gen_imgs, frame_no, num_detections)
                 
                 for j in range(num_detections):
+                    conf_val = conf_vals[j]
+                    class_id = class_ids[j]
+                    ts_name = self.DA.ts_id_to_name(class_id)
+                    dist_val = dist_vals[j]
+                    log_verified = verifieds[j]
+                    dist_val = round(dist_val, 3)
+                    conf_val = round(conf_val, 3)
+                    gen_class_id = gen_class_ids[j]
+                    gen_ts_name = "No Detection !"
+                    if gen_class_id != None: 
+                        gen_ts_name = self.DA.ts_id_to_name(gen_class_id)
+                    is_damaged = is_damageds[j]
+                    
                 # Display information on frames
                     if (self.save_video == True) or (self.debug_stream == True):
                         xmin = int(bboxes_coords[j][0])
                         ymin = int(bboxes_coords[j][1])
                         xmax = int(bboxes_coords[j][2])
                         ymax = int(bboxes_coords[j][3])
-                        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), self.bbox_color, self.bbox_thickness)
-                        self.write_text(frame, str(class_id) + ": " + ts_name, (xmin, ymin-105))
-                        self.write_text(frame, "yolo conf: " + str(conf_val), (xmin, ymin-75))
+                        # cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), self.bbox_color, self.bbox_thickness)
+                        self.write_text(frame, str(class_id) + ": " + ts_name, (xmin, ymin-110))
+                        self.write_text(frame, "csl conf: " + str(conf_val), (xmin, ymin-80))
                         self.write_text(frame, "SSIM Dist: " + str(dist_val), (xmin, ymin-45))
+                        if log_verified:
+                            self.write_text(frame, "Verified !", (xmin, ymin-15))
+                        if not log_verified:
+                            self.write_text(frame, "Gen ts cls: " + gen_ts_name, (xmin, ymin-15))
+                        
                         if is_damaged:
-                            self.write_text(frame, "Damaged !!", (xmin, ymin-15))
+                            # self.write_text(frame, "Damaged !!", (xmin, ymin-15))
+                            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), self.bbox_color, self.bbox_thickness*2)
                         else:
-                            self.write_text(frame, "Not Damaged", (xmin, ymin-15))
+                            # self.write_text(frame, "Not Damaged", (xmin, ymin-15))
+                            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0,255,0), self.bbox_thickness*2)
 
                 if (self.save_video == True):
                     resized_frame = cv2.resize(frame, (self.frame_width, self.frame_height))
