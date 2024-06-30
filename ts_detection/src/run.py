@@ -27,7 +27,7 @@ class TSDetections():
         # yolo_path = '/home/can/external_libraries/yolov5' # rospy.get_param('/yolo_dir')
         cls_model_size = 64 # rospy.get_param('/yolo_input_size')
         self.cls_conf_thresh = 0.7 # rospy.get_param('/yolo_confidence')
-        self.gen_cls_conf_thresh = 0.1
+        self.gen_cls_conf_thresh = 0.15 # AE gen threshold
         cls_iou_thresh = 0.7 # rospy.get_param('/yolo_iou')
         self.TSC = TSClassifier(cls_yolo_model, cls_model_size, cls_iou_thresh)
 
