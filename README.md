@@ -93,7 +93,7 @@ For more details about the methodology, experiments, and results, please refer t
 **Title**: Automatic Visual Traffic Sign Damage Detection Using Deep Learning Algorithms  
 **Author**: Can Ersü  
 **Institution**: Tallinn University of Technology  
-**Year**: 2024
+**Year**: 2023
 
 The thesis document is available in the root directory of this repository as `Thesis_Can_Ersu.pdf`.
 
